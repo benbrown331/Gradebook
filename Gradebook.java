@@ -7,6 +7,7 @@
 import java.lang.System;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class Gradebook {
@@ -61,6 +62,7 @@ public class Gradebook {
                         "2) Discussion\n" +
                         "3) Program\n");
                     assignmentType=sc.nextInt();
+                    //check for valid assignment type jacva
 
                     //Ask user for pertinent info
                     System.out.println("Enter the assignment grade\n");
@@ -77,7 +79,7 @@ public class Gradebook {
                     String myDate=sc.nextLine();
                     //convert string to LocalDate
                     DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("M/d/yyyy");
-                    LocalDate date = LocalDate.parse(myDate, dateFormat);
+                     LocalDate date = LocalDate.parse(myDate, dateFormat);
 
                     switch (assignmentType) {
 
@@ -118,9 +120,10 @@ public class Gradebook {
                         break;
                     }
                 }
-                    catch (GradebookFullException e) {
-                        System.out.println(e.getMessage());
-                    }
+                catch (GradebookFullException e) {
+                    System.out.println(e);
+                }
+
                     break;
 
                 //Remove grade
@@ -156,9 +159,11 @@ public class Gradebook {
                     }
                     catch (GradebookEmptyException e) {
                         System.out.println(e);
+                        break;
                     }
                     catch (InvalidGradeException f) {
                         System.out.println(f);
+                        break;
                     }
 
                     break;
@@ -166,14 +171,30 @@ public class Gradebook {
                 //Print grades
                 case 3:
 
+                try {
+                    if (thisArray.length==0) {
+                        throw new GradebookEmptyException();
+                    }
+                    
+
                     for (int j=0; j<thisArray.length; j++) {
                         System.out.println("Assignment Name: " + thisArray[j].getName() +
                         "Grade: " + thisArray[j].getGrade() + "\n");
                     }
+                }
+                catch (GradebookEmptyException e) {
+                    System.out.println(e);
+                    break;
+                }
                     break;
 
                 //Print Average
                 case 4:
+
+                try {
+                    if (thisArray.length==0) {
+                        throw new GradebookEmptyException();
+                    }
 
                     double sum=0;
                     for (int j=0; j<thisArray.length; j++) {
@@ -181,10 +202,20 @@ public class Gradebook {
                     }
                     double average=(double)(sum/thisArray.length);
                     System.out.println("Average: " + average + "\n");
+                }
+                catch (GradebookEmptyException e) {
+                    System.out.println(e);
+                    break;
+                }
                     break;
 
                 //Print high/low
                 case 5:
+
+                try {
+                    if (thisArray.length==0) {
+                        throw new GradebookEmptyException();
+                    }
 
                     double high=0;
                     double low=0;
@@ -200,10 +231,21 @@ public class Gradebook {
 
                     System.out.println("Highest Score: " + high + "\n" +
                     "Lowest Score: " + low + "\n");
+                }
+                catch (GradebookEmptyException e) {
+                    System.out.println(e);
+                    break;
+                }
                     break;
 
                 //Print quiz average
                 case 6:
+
+                try {
+
+                    if (thisArray.length==0) {
+                        throw new GradebookEmptyException();
+                    }
 
                     double quizSum=0;
                     int numQuizzes=0;
@@ -215,20 +257,46 @@ public class Gradebook {
                         }
                     }
 
+                    if (numQuizzes==0) {
+                        System.out.println("There are no quizzes in the gradebook\n");
+                        break;
+                    }
+
                     double quizAverage=(double)(quizSum/numQuizzes);
                     System.out.println("Average number of quiz questions: " + 
                         quizAverage + "\n");
+                    }
+                    catch (GradebookEmptyException e) {
+                        System.out.println(e);
+                        break;
+                    }
 
                     break;
 
                 //print discussion readings
                 case 7:
 
+                try {
+
+                    if (thisArray.length==0) {
+                        throw new GradebookEmptyException();
+                    }
+                    int numReading=0;
                     for (int j=0; j<thisArray.length; j++) {
                         if (thisArray[j] instanceof Discussion) {
                             System.out.println(((Discussion)thisArray[j]).getReading() + "\n");
+                            numReading++;
                         }
                     }
+                    if (numReading==0) {
+                        System.out.print("There are no readings in the gradebook");
+                    }
+
+                }
+                catch (GradebookEmptyException e) {
+                    System.out.println(e);
+                    break;
+                }
 
                     break;
                     
@@ -236,11 +304,28 @@ public class Gradebook {
                 //Print program concepts
                 case 8:
 
+                try {
+
+                    if (thisArray.length==0) {
+                        throw new GradebookEmptyException();
+                    }
+                    
+                    int numProgram=0;
                     for (int j=0; j<thisArray.length; j++) {
                         if (thisArray[j] instanceof Program) {
                             System.out.println(((Program)thisArray[j]).getConcept() + "\n");
+                            numProgram++;
                         }
                     }
+                    if (numProgram==0) {
+                        System.out.println("There are no programs in the gradebook\n");
+                    }
+
+                }
+                catch (GradebookEmptyException e) {
+                    System.out.println(e);
+                    break;
+                }
 
                     break;
 
