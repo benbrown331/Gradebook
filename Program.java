@@ -1,3 +1,8 @@
+/*
+    *Benjamin Brown
+    *Gradebook part 1
+    */
+
 import java.time.LocalDate;
 
 public class Program implements AssignmentInterface{
@@ -19,6 +24,8 @@ public class Program implements AssignmentInterface{
         this.concept=concept;
 
     }
+
+    public Program() {}
 
 
 

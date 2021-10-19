@@ -1,3 +1,8 @@
+/*
+    *Benjamin Brown
+    *Gradebook part 1
+    */
+
 import java.time.LocalDate;
 
 public class Quiz implements AssignmentInterface {
@@ -21,6 +26,8 @@ public class Quiz implements AssignmentInterface {
         this.numQuestions=numQuestions;
 
     }
+
+    public Quiz() {}
 
 
 

@@ -1,9 +1,11 @@
+/*
+    *Benjamin Brown
+    *Gradebook part 1
+    */
+
 import java.time.LocalDate;
 
 public interface AssignmentInterface {
-
-    //set max array size
-    int MAX_SIZE=20;
 
     //get and set for number grade
     double getGrade();
