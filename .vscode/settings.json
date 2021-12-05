@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Users\\Benjamin\\Documents\\Computer Science\\CPSC 2810\\dbTest2\\Lesson 17 HW AreaAndPerimeter\\lib\\mysql-connector-java-8.0.27.jar"
+    ]
+}

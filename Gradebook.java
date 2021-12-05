@@ -8,6 +8,10 @@
 import java.io.*;
 import java.lang.System;
 import java.nio.file.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -363,36 +367,47 @@ public class Gradebook {
                     for (int i=0; i<gradebook.size(); i++) {
                         GradebookDB.insertGrade(gradebook.get(i));
                     }
+                    System.out.println("Added to MySQL");
 
                     break;
 
                 //Read from MySQL
                 case 7:
 
-                try {
+                    System.out.println("Enter your username for the database:");
+                    username=sc.next();
+                    System.out.println("Enter your password for the database:");
+                    password=sc.next();
 
+                    //after gradebook is created, insert all of the gradebook data
+                    //return all grades to an array list
+                    ArrayList<AssignmentInterface> fromSQL=GradebookDB.getGrades(username,password);
+
+                    //sort both arrays based on name
+                    Collections.sort(fromSQL,Sorting.nameSort);
+                    Collections.sort(gradebook,Sorting.nameSort);
+                    //if gradebook is empty, simply set them equal to each other.
                     if (gradebook.isEmpty()) {
-                        throw new GradebookEmptyException();
+                        gradebook=fromSQL;
                     }
-                    int numReading=0;
-                    for (int j=0; j<gradebook.size(); j++) {
-                        if (gradebook.get(j) instanceof Discussion) {
-                            //print title before first reading
-                            if (numReading==0) {
-                                System.out.println("Discussion readings: ");
-                            }
-                            System.out.println(((Discussion)gradebook.get(j)).getReading());
-                            numReading++;
-                        }
-                    }
-                    if (numReading==0) {
-                        System.out.print("There are no readings in the gradebook\n");
-                    }
+                    else {
 
-                }
-                catch (GradebookEmptyException e) {
-                    System.out.println(e);
-                    break;
+                    //add the remaining SQL elements into gradebook
+                    for (int i=0; i<fromSQL.size(); i++) {
+                        if (fromSQL.get(i).getName().equalsIgnoreCase(gradebook.get(i).getName())) {
+                            if (fromSQL.get(i).getGrade()==gradebook.get(i).getGrade()) {
+                                if (fromSQL.get(i).getDueDate().isEqual(gradebook.get(i).getDueDate())) {
+                                    //if all these conditions are true, entry is identical
+                                    //I skipped letter because it would be redundant
+                                    break;
+                                }
+                            }
+                        }
+                        else {
+                        gradebook.add(fromSQL.get(i));
+                        }
+
+                    }
                 }
 
                     break;
@@ -401,36 +416,119 @@ public class Gradebook {
                 //MySQL Search
                 case 8:
 
-                try {
+                System.out.println("What would you like to search for in the database?" + 
+                    "Enter the corresponding letter");
+                
+                //Create menu
+                System.out.println("\nMenu: \n");
+                System.out.println("a. All quizzes");
+                System.out.println("b. All programs");
+                System.out.println("c. All discussions");
+                System.out.println("d. All grades within a certain score range");
+                System.out.println("e. All grades within a certain due date range");
+                System.out.println("f. All grades with an even score");
 
-                    if (gradebook.isEmpty()) {
-                        throw new GradebookEmptyException();
-                    }
+                // get input from user                
+                String menuChoice = sc.next();    
+                System.out.println();
+                menuChoice.toLowerCase();
+
+                System.out.println("Enter your username for the database:");
+                username=sc.next();
+                System.out.println("Enter your password for the database:");
+                password=sc.next();
+
+                //connect tp database
+                Connection connection = DBUtil.getConnection(username, password);
+                String sql="empty";
+                //check for valid entry to run Query
+                int valid=0;
+
+                switch (menuChoice.charAt(0)) {
+
+                    case 'a':
+
+        
+                    sql = "SELECT * FROM Gradebook WHERE type=\"Quiz\"";
+                    valid=1;
                     
-                    int numProgram=0;
-                    for (int j=0; j<gradebook.size(); j++) {
-                        if (gradebook.get(j) instanceof Program) {
-                            if (numProgram==0) {
-                                System.out.println("Program Concepts: ");
-                            }
-                            System.out.println(((Program)gradebook.get(j)).getConcept());
-                            numProgram++;
+
+                    break;
+
+                    case 'b':
+
+                        sql = "SELECT * FROM Gradebook WHERE type=\"Program\"";
+                        valid=1;
+        
+
+                    break;
+
+                    case 'c':
+
+                        sql = "SELECT * FROM Gradebook WHERE type=\"Discussion\"";
+        
+                        valid=1;
+
+                    break;
+
+                    case 'd': 
+
+                        System.out.println("Enter the lower grade boundry:");
+                        int grade1= sc.nextInt();
+                        System.out.println("Enter the upper grade boundry:");
+                        int grade2= sc.nextInt();
+
+                        sql = "SELECT * FROM Gradebook WHERE score between '" +grade1 + "and '" + grade2;
+                        valid=1;
+
+                        break;
+
+                        
+
+
+                    case 'e': 
+
+                        System.out.println("Enter the due date you want results after (yyyy-M-d):");
+                        String date1Str= sc.next();
+                        System.out.println("Enter the due date you want results before (yyyy-M-d):");
+                        String date2Str= sc.next();
+
+                        sql = "SELECT * FROM Gradebook WHERE dueDate between '" +date1Str + "and '" + date2Str;
+                        valid=1;
+        
+
+                    break;
+
+                        case 'f': 
+
+                        sql = "SELECT * FROM Gradebook WHERE score % 2 = 0";
+                        valid=1;
+
+                        break;
+
+                    }
+                    if (valid==1) {
+                    try (PreparedStatement ps = connection.prepareStatement(sql);
+                           ResultSet rs = ps.executeQuery()) {
+                                while (rs.next()) {
+                                    System.out.println("Name: " + rs.getString("name")
+                            + " Score: " + rs.getString("score") + " Letter: " + rs.getString("letter") 
+                            + " Due Date: " + rs.getString("dueDate") + " Unique variable: " +rs.getString("special"));
+                        }
+                        } catch (SQLException e)  {
+                        e.printStackTrace();
                         }
                     }
-                    if (numProgram==0) {
-                        System.out.println("There are no programs in the gradebook\n");
+                    else {
+                        System.out.println("Invalid input");
                     }
 
-                }
-                catch (GradebookEmptyException e) {
-                    System.out.println(e);
-                    break;
-                }
-
-                    break;
+                break;
+                
 
                 //quit
                 case 9: 
+
                     System.out.println("Thank you for using this gradebook program."
                     + " Goodbye!");
                     break;

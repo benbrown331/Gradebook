@@ -25,7 +25,7 @@ public class DBUtil {
         else {
             try {
                 // set the db url, username, and password
-                String url = "jdbc:mysql://myawsdb.cno2zewghfii.us-east-1.rds.amazonaws.com";
+                String url = "jdbc:mysql://area-perimeterhw.cp79vduudv1c.us-east-1.rds.amazonaws.com/rectschema";
                 // get and return connection
                 connection = DriverManager.getConnection(
                         url, username, password);
